@@ -1,8 +1,11 @@
-from pathlib import Path
 import hashlib
 
 from django.utils import timezone
 from django.conf import settings
+import qrcode
+from qrcode.image.svg import SvgPathImage
+import xml.etree.ElementTree as ET
+
 
 def hash_file(file, block_size=65536):
     hash_func = hashlib.md5()
@@ -13,11 +16,36 @@ def hash_file(file, block_size=65536):
         hash_func.update(file.read())
     return hash_func.hexdigest()
 
+
 def get_upload_path(instance, filename):
     date = timezone.now()
-    path = Path(filename)
-    ext = ''.join(path.suffixes)
     hash_string = hash_file(instance.file)
     instance.hash = hash_string
     instance.filename = filename
-    return f'{settings.FILES_PATH}/{date:%Y}/{date:%m}/{date:%d}/{hash_file(instance.file)}{ext}'
+    return f'{settings.FILES_PATH}/{date:%Y}/{date:%m}/{date:%d}/{hash_file(instance.file)}'
+
+
+def make_qrcode_svg(text: str, size=40):
+    qr = qrcode.QRCode(box_size=size, border=4, image_factory=SvgPathImage)
+    qr.add_data(text)
+    qr.make(fit=True)
+    qr_code = qr.make_image()
+    file_redirect = FileRedirect()
+    qr_code.save(file_redirect)
+    return file_redirect.text
+
+
+class FileRedirect:
+    """Class for redirecting fileIO to string"""
+
+    text = ''
+
+    def write(self, text):
+        print(text)
+        self.text += text.decode()
+
+    def __str__(self):
+        return self.text
+
+    def __repr__(self):
+        return self.__str__()
