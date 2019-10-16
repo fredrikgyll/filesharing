@@ -5,7 +5,6 @@ from django.shortcuts import render
 from sharing.forms import FileForm, PasswordForm
 from sharing.models import SharedFile
 
-# TODO: Make upload redirect page
 # TODO: Make drag and drop fileupload: https://www.smashingmagazine.com/2018/01/drag-drop-file-uploader-vanilla-js/
 
 
@@ -14,7 +13,8 @@ def index(request):
     # svg = make_qrcode_svg("link", size=40)
     if request.POST:
         if form.is_valid():
-            form.save()
+            file = form.save()
+            return render(request, 'sharing/share_link.html', {'file': file})
     context = {
         'form': form,
         #   'svg': svg

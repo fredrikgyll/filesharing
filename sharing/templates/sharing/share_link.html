@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h1>Success!</h1>
+    <p>link to share: <a href="{{ request.META.HTTP_HOST }}{%  url 'sharing:get_by_hash' file.url_hash %}">{{ request.META.HTTP_HOST }}{%  url 'sharing:get_by_hash' file.url_hash %}</a></p>
+    <a href="{% url 'sharing:index' %}" class="button">Send another</a>
+  </div>
+{% endblock %}
