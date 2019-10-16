@@ -6,12 +6,23 @@ from sharing.models import SharedFile
 class FileForm(forms.ModelForm):
     class Meta:
         model = SharedFile
-        fields = ('file', 'password', 'message', 'short_identifier', 'burn_after_open', 'burn_after')
+        fields = (
+            'file',
+            'password',
+            'message',
+            'short_identifier',
+            'burn_after_open',
+            'burn_after',
+        )
         widgets = {
             'password': forms.TextInput(attrs={'placeholder': 'Optional password'}),
-            'short_identifier': forms.TextInput(attrs={'placeholder': 'Optional short url slug'}),
-            'message': forms.Textarea(attrs={'placeholder': 'Message to be shown to recipient'}),
-            'burn_after_open': forms.CheckboxInput(attrs={'label': ''})
+            'short_identifier': forms.TextInput(
+                attrs={'placeholder': 'Optional short url slug'}
+            ),
+            'message': forms.Textarea(
+                attrs={'placeholder': 'Message to be shown to recipient'}
+            ),
+            'burn_after_open': forms.CheckboxInput(attrs={'label': ''}),
         }
 
     def save(self, commit=True):
@@ -22,3 +33,7 @@ class FileForm(forms.ModelForm):
         if commit:
             m.save()
         return m
+
+
+class PasswordForm(forms.Form):
+    password = forms.CharField(widget=forms.PasswordInput)

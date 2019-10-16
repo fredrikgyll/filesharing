@@ -40,12 +40,14 @@ class SharedFile(models.Model):
 
     def set_password(self, clear_password: str, commit=True):
         hashed = bcrypt.hashpw(clear_password.encode('utf-8'), bcrypt.gensalt(12))
-        self.password = hashed
+        self.password = hashed.decode('utf-8')
         if commit:
             self.save()
 
     def check_password(self, clear_password: str) -> bool:
-        return bcrypt.checkpw(clear_password.encode('utf-8'), self.password)
+        return bcrypt.checkpw(
+            clear_password.encode('utf-8'), self.password.encode('utf-8')
+        )
 
     def __str__(self):
         return self.filename
