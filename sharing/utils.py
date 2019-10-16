@@ -1,10 +1,10 @@
 import hashlib
+from uuid import uuid4
 
 from django.utils import timezone
 from django.conf import settings
 import qrcode
 from qrcode.image.svg import SvgPathImage
-import xml.etree.ElementTree as ET
 
 
 def hash_file(file, block_size=65536):
@@ -20,10 +20,12 @@ def hash_file(file, block_size=65536):
 def get_upload_path(instance, filename):
     date = timezone.now()
     hash_string = hash_file(instance.file)
-    instance.hash = hash_string
+    instance.file_hash = hash_string
     instance.filename = filename
-    return f'{settings.FILES_PATH}/{date:%Y}/{date:%m}/{date:%d}/{hash_file(instance.file)}'
+    return f'{settings.FILES_PATH}/{date:%Y}/{date:%m}/{date:%d}/{hash_string}'
 
+def make_url_hash():
+    return uuid4().hex
 
 def make_qrcode_svg(text: str, size=40):
     qr = qrcode.QRCode(box_size=size, border=4, image_factory=SvgPathImage)
@@ -36,8 +38,7 @@ def make_qrcode_svg(text: str, size=40):
 
 
 class FileRedirect:
-    """Class for redirecting fileIO to string"""
-
+    """Class for redirecting fileIO to string when generating QR code"""
     text = ''
 
     def write(self, text):

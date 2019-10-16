@@ -3,16 +3,17 @@ from datetime import timedelta
 import bcrypt
 from django.db import models
 
-from .utils import get_upload_path
+from .utils import get_upload_path, make_url_hash
 
 
 class SharedFile(models.Model):
     uploaded = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to=get_upload_path)
     filename = models.CharField(max_length=128, blank=True)
-    hash = models.CharField(max_length=128, blank=True)
+    url_hash = models.CharField(max_length=128, unique=True, default=make_url_hash)
+    file_hash = models.CharField(max_length=128, blank=True)
     password = models.CharField(max_length=128, null=True, blank=True, unique=True)
-    message = models.TextField(null=True, blank=True, unique=True)
+    message = models.TextField(null=True, blank=True)
     burn_after_open = models.BooleanField(
         default=False, help_text='Expire link after it is visited once'
     )
@@ -48,3 +49,13 @@ class SharedFile(models.Model):
 
     def __str__(self):
         return self.filename
+
+
+class FileToken(models.Model):
+    # This may be totally unessesarry with only the link_hash being distributed
+    file = models.ForeignKey('SharedFile', on_delete=models.CASCADE)
+    token = models.CharField(max_length=128, unique=True)
+    issued = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Token "{self.file}" issued {self.issued}'
