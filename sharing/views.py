@@ -32,12 +32,15 @@ def get_by_hash(request, url_hash):
         form = PasswordForm(request.POST or None)
         if request.POST and form.is_valid():
             if file.check_password(form.cleaned_data['password']):
-                return valid_request(request, file)
+                return serve_file(request, file)
             form.add_error('password', 'Incorrect password')
         return render(request, 'sharing/password_form.html', {'form': form})
-    return valid_request(request, file)
+    return serve_file(request, file)
 
 
-def valid_request(request, file):
-    """return download file button"""
-    return FileResponse(file.file, as_attachment=True, filename=file.filename)
+def serve_file(request, file):
+    """return file as attachment"""
+    response = FileResponse(file.file, as_attachment=True, filename=file.filename)
+    if file.burn_after_open:
+        file.delete()
+    return response
